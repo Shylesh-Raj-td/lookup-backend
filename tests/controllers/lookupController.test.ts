@@ -13,7 +13,6 @@ describe("lookupController", () => {
   let json: jest.Mock;
 
   beforeEach(() => {
-    // Reset mocks before each test
     req = {};
     res = {
       status: jest.fn().mockReturnThis(),
@@ -23,7 +22,7 @@ describe("lookupController", () => {
   });
 
   it("should return 400 if query is not provided", async () => {
-    req.body = {}; // No query
+    req.body = {};
 
     await lookupController(req as Request, res as Response);
 
@@ -35,7 +34,6 @@ describe("lookupController", () => {
     const query = "example.com";
     req.body = { query };
 
-    // Mock the response of the fetchWhoisData function
     mocked(fetchWhoisData).mockResolvedValue({
       WhoisRecord: {
         domainName: query,
@@ -75,8 +73,6 @@ describe("lookupController", () => {
   it("should handle unexpected errors and return 500", async () => {
     const query = "example.com";
     req.body = { query };
-
-    // Mock fetchWhoisData to throw a non-Axios error
     const error = new Error("Unexpected error");
     mocked(fetchWhoisData).mockRejectedValue(error);
 
