@@ -3,7 +3,7 @@ name: Deploy to Heroku
 on:
   push:
     branches:
-      - main # Change this if your default branch is different
+      - main
 
 jobs:
   deploy:
@@ -29,3 +29,12 @@ jobs:
       - name: Release the Image
         run: |
           heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
+
+      - name: Restart App (Ensure New Deployment Runs)
+        run: |
+          heroku restart --app ${{ secrets.HEROKU_APP_NAME }}
+
+      - name: Check Logs if Deployment Fails
+        if: failure()
+        run: |
+          heroku logs --tail --app ${{ secrets.HEROKU_APP_NAME }}
