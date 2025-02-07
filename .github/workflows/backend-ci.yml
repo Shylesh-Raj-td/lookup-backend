@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "Deploying to Heroku App: ${{ secrets.HEROKU_APP_NAME }}"
           heroku --version
-          heroku auth:whoami
+          heroku auth:whoami || { echo "❌ Authentication failed!"; exit 1; }
           docker --version
 
       - name: Build and Push Docker Image
@@ -43,10 +43,6 @@ jobs:
           docker images
           docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
           docker image ls registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
-
-      - name: Verify Pushed Image
-        run: |
-          heroku container:info --app ${{ secrets.HEROKU_APP_NAME }}
 
       - name: Release the Image
         run: |
