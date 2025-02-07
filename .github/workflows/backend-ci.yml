@@ -17,13 +17,16 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Log in to Heroku
+      - name: Log in to Heroku (Non-Interactive)
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          echo "${{ secrets.HEROKU_API_KEY }}" | heroku auth:login --interactive
+          heroku auth:token > /dev/null
+          echo "✅ Logged into Heroku CLI successfully!"
 
       - name: Verify Heroku Authentication
         run: |
-          heroku auth:whoami || echo "Authentication failed"
+          heroku auth:whoami || { echo "❌ Authentication failed!"; exit 1; }
 
       - name: Log in to Heroku Container Registry
         run: |
