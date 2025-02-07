@@ -4,9 +4,12 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "start": "ts-node src/server.ts",
-    "test": "jest"
-  },
+  "build": "tsc",
+  "start": "node dist/server.js",
+  "dev": "ts-node src/server.ts",
+  "test": "jest"
+}
+,
   "keywords": [],
   "author": "",
   "license": "ISC",

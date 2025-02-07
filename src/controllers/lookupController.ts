@@ -4,7 +4,6 @@ import { fetchWhoisData } from "../servcies/whoisService";
 
 export const lookupController = async (req: Request, res: Response) => {
   const { query } = req.body;
-  console.log("Request Body inside lookupController:", req.body);
 
   if (!query) {
     return res.status(400).json({ error: "Query is required" });
