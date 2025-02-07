@@ -29,5 +29,7 @@ app.get("/", (req, res) => {
 app.post("/lookup", lookupController as RequestHandler);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(
+    `Server is running on port ${PORT}, process.env.PORT=${process.env.PORT}`
+  );
 });
