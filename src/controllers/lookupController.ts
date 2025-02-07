@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { AxiosError } from "axios";
 import { fetchWhoisData } from "../servcies/whoisService";
 
 export const lookupController = async (req: Request, res: Response) => {
@@ -12,15 +11,8 @@ export const lookupController = async (req: Request, res: Response) => {
   try {
     const data = await fetchWhoisData(query);
     res.json(data);
-  } catch (error: unknown) {
-    if (error instanceof AxiosError) {
-      console.error(
-        "Error fetching data from JsonWhois API:",
-        error.response?.data || error.message
-      );
-    } else {
-      console.error("An unexpected error occurred:", error);
-    }
-    throw error;
+  } catch (error) {
+    console.error("Unexpected error occurred:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
