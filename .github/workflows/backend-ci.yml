@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,22 +18,35 @@ jobs:
 
       - name: Log in to Heroku Container Registry
         run: |
-          echo ${{ secrets.HEROKU_API_KEY }} | docker login --username=_ --password-stdin registry.heroku.com
+          echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
+
+      - name: Debug Heroku and GitHub Actions Environment
+        run: |
+          echo "Deploying to Heroku App: ${{ secrets.HEROKU_APP_NAME }}"
+          heroku --version
+          heroku auth:whoami
+          docker --version
 
       - name: Build and Push Docker Image
         run: |
           docker build -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
+          docker images  # Check if the image is built
           docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
+          docker image ls registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web  # Verify pushed image
+
+      - name: Verify Pushed Image
+        run: |
+          heroku container:info --app ${{ secrets.HEROKU_APP_NAME }}
 
       - name: Release the Image
         run: |
           heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
 
-      - name: Restart App (Ensure New Deployment Runs)
+      - name: Restart Heroku App (Ensure New Deployment)
         run: |
           heroku restart --app ${{ secrets.HEROKU_APP_NAME }}
 
-      - name: Check Logs if Deployment Fails
-        if: failure()
+      - name: Check Deployment Status
         run: |
-          heroku logs --tail --app ${{ secrets.HEROKU_APP_NAME }}
+          heroku ps --app ${{ secrets.HEROKU_APP_NAME }}
+          heroku releases --app ${{ secrets.HEROKU_APP_NAME }}
