@@ -17,42 +17,36 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Authenticate with Heroku
+      - name: Verify Heroku CLI Installation
+        run: heroku --version
+
+      - name: Log in to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          echo "🔐 Logging into Heroku..."
-          echo "$HEROKU_API_KEY" | heroku auth:token > /dev/null
-          HEROKU_API_KEY=${{ secrets.HEROKU_API_KEY }} heroku auth:whoami || { echo "❌ Authentication failed!"; exit 1; }
-          echo "✅ Successfully logged in as $(heroku auth:whoami)"
+          echo "🔑 Logging in to Heroku..."
+          echo $HEROKU_API_KEY | heroku auth:token
+          heroku auth:whoami
 
       - name: Log in to Heroku Container Registry
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
-
-      - name: Debug Heroku and GitHub Actions Environment
-        run: |
-          echo "Deploying to Heroku App: ${{ secrets.HEROKU_APP_NAME }}"
-          heroku --version
-          heroku auth:whoami || { echo "❌ Authentication failed!"; exit 1; }
-          docker --version
+          echo "🔑 Logging in to Heroku Container Registry..."
+          echo $HEROKU_API_KEY | docker login --username=_ --password-stdin registry.heroku.com
 
       - name: Build and Push Docker Image
         run: |
+          echo "🐳 Building and pushing Docker image..."
           docker build -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
-          docker images
           docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
-          docker image ls registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
 
       - name: Release the Image
         run: |
+          echo "🚀 Releasing the image..."
           heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
-
-      - name: Restart Heroku App
-        run: |
-          heroku restart --app ${{ secrets.HEROKU_APP_NAME }}
 
       - name: Check Deployment Status
         run: |
+          echo "🔍 Checking deployment status..."
           heroku ps --app ${{ secrets.HEROKU_APP_NAME }}
-          heroku releases --app ${{ secrets.HEROKU_APP_NAME }}
