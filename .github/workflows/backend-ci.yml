@@ -1,4 +1,4 @@
-name: Lookup Backend
+name: Deploy to Heroku
 
 on:
   push:
@@ -11,24 +11,17 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push Docker image
+      - name: Log in to Heroku Container Registry
         run: |
-          docker build -t <docker-username>/lookup-backend .
-          docker push <docker-username>/lookup-backend
+          echo ${{ secrets.HEROKU_API_KEY }} | docker login --username=_ --password-stdin registry.heroku.com
 
-      - name: Deploy to Railway (Backend)
-        uses: railwayapp/railway-action@v1
-        with:
-          project_id: ${{ secrets.RAILWAY_PROJECT_ID }}
-          environment: production
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
+          docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
+
+      - name: Release the Image
+        run: |
+          heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
