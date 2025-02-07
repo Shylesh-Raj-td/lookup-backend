@@ -1,9 +1,7 @@
-name: Deploy to Heroku
+name: Manual Deploy to Heroku
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -17,36 +15,21 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Verify Heroku CLI Installation
-        run: heroku --version
-
-      - name: Log in to Heroku
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: |
-          echo "🔑 Logging in to Heroku..."
-          echo $HEROKU_API_KEY | heroku auth:token
-          heroku auth:whoami
-
       - name: Log in to Heroku Container Registry
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          echo "🔑 Logging in to Heroku Container Registry..."
           echo $HEROKU_API_KEY | docker login --username=_ --password-stdin registry.heroku.com
 
       - name: Build and Push Docker Image
         run: |
-          echo "🐳 Building and pushing Docker image..."
           docker build -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
           docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
 
       - name: Release the Image
         run: |
-          echo "🚀 Releasing the image..."
           heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
 
-      - name: Check Deployment Status
+      - name: Restart App (if needed)
         run: |
-          echo "🔍 Checking deployment status..."
-          heroku ps --app ${{ secrets.HEROKU_APP_NAME }}
+          heroku restart --app ${{ secrets.HEROKU_APP_NAME }}
