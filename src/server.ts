@@ -9,12 +9,15 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
+console.log("cors is done");
 app.use(express.json());
+console.log("request body");
 app.use(express.urlencoded({ extended: true }));
+console.log("url encoding is done");
 
 app.use((req, res, next) => {
   console.log(`Incoming Request: ${req.method} ${req.url}`);
-  console.log(`Incoming Request: ${req.method} ${req.url}`);
+  console.log("Request Headers:", req.headers);
   console.log("Request Body:", req.body);
   next();
 });
