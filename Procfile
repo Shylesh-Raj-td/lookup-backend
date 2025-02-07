@@ -1,1 +1,1 @@
-web: ts-node utils/server.ts
+web: node dist/server.js
